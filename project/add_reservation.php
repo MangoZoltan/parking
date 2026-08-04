@@ -35,6 +35,16 @@ if ($_SERVER['REQUEST_METHOD'] != "POST") {
         }
     }
 
+    // Kezdet és vég validálás
+    if ($noerror) {
+        $start = new DateTime($start_time_str);
+        $end = new DateTime($end_time_str);
+        if ($start > $end) {
+            $reserve_status = "Sikertelen: a parkolás vége nem lehet elöbb a kezdeténél.";
+            $noerror = false;
+        }
+    }
+
     // Átfedések ellenőrzése
     if ($noerror) {
         $sql = "SELECT COUNT(*) as 'count' FROM `reservations` WHERE
