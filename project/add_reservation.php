@@ -27,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] != "POST") {
     $stmt = CONN->prepare($sql);
     $stmt->bindParam(1, $end_time_str, PDO::PARAM_STR);
     $stmt->bindParam(2, $start_time_str, PDO::PARAM_STR);
-    $stmt->bindParam(3, $space, PDO::PARAM_INT);
+    $stmt->bindParam(3, $space, PDO::PARAM_STR);
 
     if (!$stmt->execute()) {
         $reserve_status = "Sikertelen: hiba átfedés keresés közben.";
@@ -42,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] != "POST") {
     if (!($count > 0)) {
         $sql = "INSERT INTO `reservations` (`space`, `reserver`, `start_time`, `end_time`) VALUES (?, ?, ?, ?);";
         $stmt = CONN->prepare($sql);
-        $stmt->bindParam(1, $space, PDO::PARAM_INT);
+        $stmt->bindParam(1, $space, PDO::PARAM_STR);
         $stmt->bindParam(2, $reserver, PDO::PARAM_STR);
         $stmt->bindParam(3, $start_time_str, PDO::PARAM_STR);
         $stmt->bindParam(4, $end_time_str, PDO::PARAM_STR);
