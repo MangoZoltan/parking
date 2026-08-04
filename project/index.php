@@ -1,3 +1,14 @@
+<?php
+include "./db_connect.php";
+
+// Parkolóhelyek lekérése
+function get_spaces()
+{
+    $sql = "SELECT * FROM `spaces`";
+    $result = CONN->query($sql);
+    return $result->fetchAll();
+}
+?>
 <!DOCTYPE html>
 <html lang="hu">
 
@@ -14,12 +25,22 @@
 <body>
     <div class="container">
         <div class="row">
-            <div class="col-12 py-3"><h1>Parkolóhely foglalás</h1></div>
+            <div class="col-12 py-3">
+                <h1>Parkolóhely foglalás</h1>
+            </div>
         </div>
+        <!-- Parkolóhelyek listázása -->
         <div class="row">
             <div class="col-12 py-3">
                 <h2>Helyek</h2>
-                <div></div>
+                <div class="d-flex">
+                    <?php
+                    $spaces = get_spaces();
+                    foreach ($spaces as $space) {
+                        echo "<div class='border border-2 border-primary py-1 px-2 rounded'>".$space["name"]."</div>";
+                    }
+                    ?>
+                </div>
             </div>
         </div>
         <div class="row">
