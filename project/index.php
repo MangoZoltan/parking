@@ -37,7 +37,7 @@ function get_spaces()
                     <?php
                     $spaces = get_spaces();
                     foreach ($spaces as $space) {
-                        echo "<div class='border border-2 border-primary py-1 px-2 rounded'>".$space["name"]."</div>";
+                        echo "<div class='border border-2 border-primary py-1 px-2 rounded'>" . $space["name"] . "</div>";
                     }
                     ?>
                 </div>
@@ -47,18 +47,27 @@ function get_spaces()
             <div class="col-12 py-3">
                 <h2>Foglalás</h2>
                 <div>
-                    <form>
-                        <label for="rev_space">Parkoló hely:</label>
-                        <input type="text" name="res_space" id="res_space" placeholder="pl.: a1" />
-                        <label for="rev_reserver">Foglaló neve:</label>
-                        <input type="text" name="res_reserver" id="res_reserver" placeholder="pl.: Anna" />
-                        <label for="rev_reserver">Parkolás kezdete:</label>
-                        <input type="date" name="res_start_date" id="res_start_date" />
-                        <input type="time" name="res_start_time" id="res_start_time" />
-                        <label for="rev_reserver">Parkolás vége:</label>
-                        <input type="date" name="res_end_date" id="res_end_date" />
-                        <input type="time" name="res_end_time" id="res_end_time" />
-                        <button type="submit">Foglalás</button>
+                    <form class="row" action="add_reservation.php" method="POST">
+                        <div class="mb-2">
+                            <label for="rev_space">Parkoló hely:</label>
+                            <input type="text" name="res_space" id="res_space" placeholder="pl.: a1" />
+
+                            <label for="rev_reserver">Foglaló neve:</label>
+                            <input type="text" name="res_reserver" id="res_reserver" placeholder="pl.: Anna" />
+                        </div>
+                        <div class="mb-2">
+                            <label for="rev_reserver">Parkolás kezdete:</label>
+                            <input type="date" name="res_start_date" id="res_start_date" />
+                            <input type="time" name="res_start_time" id="res_start_time" />
+                        </div>
+                        <div class="mb-2">
+                            <label for="rev_reserver">Parkolás vége:</label>
+                            <input type="date" name="res_end_date" id="res_end_date" />
+                            <input type="time" name="res_end_time" id="res_end_time" />
+                        </div>
+                        <div class="mb-2">
+                            <button type="submit">Foglalás</button>
+                        </div>
                     </form>
                 </div>
             </div>
