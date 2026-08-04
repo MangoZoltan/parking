@@ -8,6 +8,14 @@ function get_spaces()
     $result = CONN->query($sql);
     return $result->fetchAll();
 }
+
+// Foglalások lekérése
+function get_reservations()
+{
+    $sql = "SELECT * FROM `reservations`";
+    $result = CONN->query($sql);
+    return $result->fetchAll();
+}
 ?>
 <!DOCTYPE html>
 <html lang="hu">
@@ -37,7 +45,7 @@ function get_spaces()
                     <?php
                     $spaces = get_spaces();
                     foreach ($spaces as $space) {
-                        echo "<div class='border border-2 border-primary py-1 px-2 rounded'>" . $space["name"] . "</div>";
+                        echo "<div class='border border-2 border-primary py-1 px-2 rounded me-2'>" . $space["name"] . "</div>";
                     }
                     ?>
                 </div>
@@ -83,6 +91,21 @@ function get_spaces()
                         <button type="submit">Keresés</button>
                     </form>
                 </div>
+                <table class="table">
+                    <tr>
+                        <th>#</th>
+                        <th>Foglaló</th>
+                        <th>Hely</th>
+                        <th>Kezdete</th>
+                        <th>Vége</th>
+                    </tr>
+                    <?php
+                    $reservations = get_reservations();
+                    foreach ($reservations as $reservation) {
+                        echo "<tr><td>" . $reservation["id"] . "</td><td>" . $reservation["reserver"] . "</td><td>" . $reservation["space"] . "</td><td>" . $reservation["start_time"] . "</td><td>" . $reservation["end_time"] . "</td></tr>";
+                    }
+                    ?>
+                </table>
             </div>
         </div>
     </div>
