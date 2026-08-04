@@ -7,6 +7,7 @@ if ($_SERVER['REQUEST_METHOD'] != "POST") {
     header("Location: index.php");
     die();
 } else {
+    $reserve_status = "-";
     $space = $_POST['res_space'] ?? null;
     $reserver = $_POST['res_reserver'] ?? null;
     $start_date = $_POST['res_start_date'] ?? null;
@@ -18,19 +19,74 @@ if ($_SERVER['REQUEST_METHOD'] != "POST") {
     $start_time_str = $start_date . ' ' . $start_time . ':00';
     $end_time_str = $end_date . ' ' . $end_time . ':00';
 
-    $sql = "INSERT INTO `reservations` (`space`, `reserver`, `start_time`, `end_time`) VALUES (?, ?, ?, ?);";
+    // Átfedések ellenőrzése
+    $sql = "SELECT COUNT(*) as 'count' FROM `reservations` WHERE
+            (
+                (start_time < ? AND end_time > ?)
+            ) AND space  = ?";
     $stmt = CONN->prepare($sql);
-    $stmt->bindParam(1, $space, PDO::PARAM_INT);
-    $stmt->bindParam(2, $reserver, PDO::PARAM_STR);
-    $stmt->bindParam(3, $start_time_str, PDO::PARAM_STR);
-    $stmt->bindParam(4, $end_time_str, PDO::PARAM_STR);
+    $stmt->bindParam(1, $end_time_str, PDO::PARAM_STR);
+    $stmt->bindParam(2, $start_time_str, PDO::PARAM_STR);
+    $stmt->bindParam(3, $space, PDO::PARAM_INT);
 
     if (!$stmt->execute()) {
-        echo "Nem sikerült végrehajtani!";
+        $reserve_status = "Sikertelen: hiba átfedés keresés közben.";
     } else {
-        echo "
-        <h1>Sikeres foglalás!</h1>
-        <a href='./index.php'>Vissza</a>
-        ";
+        $count = $stmt->fetch()['count'];
+        if ($count > 0) {
+            $reserve_status = "Sikertelen: egybeesik egy másik foglalással.";
+        }
+    }
+
+    // Rögzítés az adatbáziban
+    if (!($count > 0)) {
+        $sql = "INSERT INTO `reservations` (`space`, `reserver`, `start_time`, `end_time`) VALUES (?, ?, ?, ?);";
+        $stmt = CONN->prepare($sql);
+        $stmt->bindParam(1, $space, PDO::PARAM_INT);
+        $stmt->bindParam(2, $reserver, PDO::PARAM_STR);
+        $stmt->bindParam(3, $start_time_str, PDO::PARAM_STR);
+        $stmt->bindParam(4, $end_time_str, PDO::PARAM_STR);
+
+        if (!$stmt->execute()) {
+            $reserve_status = "Sikertelen: hiba rögzítés közben.";
+        } else {
+            $reserve_status = "Sikeres foglalás!";
+        }
     }
 }
+?>
+
+<!DOCTYPE html>
+<html lang="hu">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parkolóhely foglalás</title>
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="./assets/bootstrap/css/bootstrap.css" />
+    <script src="./assets/bootstrap/js/bootstrap.js" defer></script>
+    <script src="./assets/bootstrap/js/popper.min.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-12 py-3">
+                <h2>Foglalás adatai</h2>
+                <p><b>Foglalási név: </b><?= $reserver ?></p>
+                <p><b>Parkolóhely: </b><?= $space ?></p>
+                <p><b>Időtartam</b></p>
+                <p><b>Kezdete: </b><?= $start_date . ' | ' . $start_time ?></p>
+                <p><b>Vége: </b><?= $end_date . ' | ' . $end_time ?></p>
+            </div>
+            <div class="col-12 py-3">
+                <h2>Státusz</h2>
+                <h1><?= $reserve_status ?></h1>
+            </div>
+            <div class="col-12 py-3">
+                <a href='./index.php'>Vissza</a>
+            </div>
+        </div>
+    </div>
+</body>
