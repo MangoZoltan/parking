@@ -12,6 +12,18 @@ Szükség esetén törölhető egy-egy foglalás.
 
 **Adatbázis:** MySQL - 8.4
 
+## Teljesítmény optimalizálás
+A feladat önmagában nem tartalmaz olyan részeket, amelyek túlzottan erőforrás-igényesek lennének.
+Ennek ellenére mindig lehet javítani az optimalizáltságon.
+
+### Foglalás optimalizálása
+- Ha egy kritériumnak nem felel meg a foglalási kérés, akkor a többit már nem ellenőrzi.
+- Csak akkor hajt végra adatbázis-lekérést, amikor az elengedhetetlen.
+- Az időpontok összehasonlításánál elengedhetetlen az adatbázis lekérdezése. Itt viszont ahelyett, hogy csak lekérdezne, majd PHP-ban végezné az összehasonlítást, mindez már a queryben megtörténik. Ez kevesebb lépés, valamint az ilyen jellegű feladatokat az adatbázis gyorsabban tudja elvégezni.
+
+### Foglalás szűrése
+Alap értelmezetten minden foglalás megjelenik, szűréskor azonban csak azok a mezők kerülnek lekérdezésre, melyek megfelelnek a kritériumnak, így nem terheli feleslegesen nagy adatlekérés az adatbázist.
+
 ## Adatbázis - Táblák
 ### spaces
 id - INT, PRIMARY-KEY
