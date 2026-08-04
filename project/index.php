@@ -120,7 +120,7 @@ if (!empty($_GET['delete_by_id'])) {
                 <div>
                     <form class="row" action="add_reservation.php" method="POST">
                         <div class="mb-2">
-                            <label for="rev_space">Parkoló hely:</label>
+                            <label for="rev_space">Parkolóhely:</label>
                             <input type="text" name="res_space" id="res_space" placeholder="pl.: a1" />
 
                             <label for="rev_reserver">Foglaló neve:</label>

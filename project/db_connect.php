@@ -1,5 +1,5 @@
 <?php
-$db_server = "localhost";
+$db_server = "db";
 $db_user   = "root";
 $db_psw    = "";
 $db_name   = "parking_reservation";
