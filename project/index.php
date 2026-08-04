@@ -1,10 +1,11 @@
 <?php
+
 include "./db_connect.php";
 
 // Parkolóhelyek lekérése
 function get_spaces()
 {
-    $sql = "SELECT * FROM `spaces`";
+    $sql = "SELECT * FROM `spaces` ORDER BY `id`";
     $result = CONN->query($sql);
     return $result->fetchAll();
 }
@@ -12,7 +13,7 @@ function get_spaces()
 // Foglalások lekérése
 function get_reservations()
 {
-    $sql = "SELECT * FROM `reservations`";
+    $sql = "SELECT * FROM `reservations` ORDER BY `space`, `start_time`";
     $result = CONN->query($sql);
     return $result->fetchAll();
 }
@@ -20,7 +21,7 @@ function get_reservations()
 // Foglalások lekérése parkolóhely alapján
 function get_reservations_by_space($space)
 {
-    $sql = "SELECT * FROM `reservations` WHERE `space` = ?";
+    $sql = "SELECT * FROM `reservations` WHERE `space` = ? ORDER BY `start_time`";
     $stmt = CONN->prepare($sql);
     $stmt->bindParam(1, $space, PDO::PARAM_STR);
     $stmt->execute();
@@ -56,6 +57,26 @@ if (!empty($_GET['filter_by_space'])) {
         $reservations = get_reservations_by_space($space);
 } else {
     $reservations = get_reservations();
+}
+
+// Foglalás törlése
+$delete_status = null;
+if (!empty($_GET['delete_by_id'])) {
+
+    echo $id = $_GET['delete_by_id'];
+    $sql = "DELETE FROM `reservations` WHERE `id` = ?";
+    $stmt = CONN->prepare($sql);
+    $stmt->bindParam(1, $id, PDO::PARAM_STR);
+    if (!$stmt->execute()) {
+        $delete_status = "Sikertelen: hiba törlés közben.";
+    } else {
+        $effect = $stmt->rowCount();
+        if ($effect > 0) {
+            $delete_status = "A foglalás törölve lett!";
+        } else {
+            $delete_status = "Nincs érintett sor!";
+        }
+    }
 }
 
 ?>
@@ -116,7 +137,7 @@ if (!empty($_GET['filter_by_space'])) {
                             <input type="time" name="res_end_time" id="res_end_time" />
                         </div>
                         <div class="mb-2">
-                            <button type="submit">Foglalás</button>
+                            <button class="btn btn-primary" type="submit">Foglalás</button>
                         </div>
                     </form>
                 </div>
@@ -130,10 +151,12 @@ if (!empty($_GET['filter_by_space'])) {
                     <p class="m-0">Szűrés parkolóhelyre:</p>
                     <form method="GET" action="index.php">
                         <input type="text" name="filter_by_space" id="filter_by_space" placeholder="Pl.: A1" value="<?= empty($_GET['filter_by_space']) ? "" : $_GET['filter_by_space'] ?>">
-                        <button type="submit">Keresés</button>
+                        <button class="btn btn-primary" type="submit">Keresés</button>
                     </form>
                 </div>
                 <?php if ($filter_status != null) echo "<div class='my-2 py-2 px-3 bg-primary rounded text-white'>" . $filter_status . "</div>"; ?>
+                <?php if ($delete_status != null) echo "<div class='my-2 py-2 px-3 border border-2 border-warning rounded'><h4>Törlés</h4>" . $delete_status . "</div>";
+                unset($_SESSION['delete_by_id']); ?>
                 <table class="table">
                     <tr>
                         <th>#</th>
@@ -141,14 +164,15 @@ if (!empty($_GET['filter_by_space'])) {
                         <th>Hely</th>
                         <th>Kezdete</th>
                         <th>Vége</th>
+                        <th>Kezelés</th>
                     </tr>
                     <?php
-                    
+
                     foreach ($reservations as $reservation) {
-                        echo "<tr><td>" . $reservation["id"] . "</td><td>" . $reservation["reserver"] . "</td><td>" . $reservation["space"] . "</td><td>" . $reservation["start_time"] . "</td><td>" . $reservation["end_time"] . "</td></tr>";
+                        echo "<tr><td>" . $reservation["id"] . "</td><td>" . $reservation["reserver"] . "</td><td>" . $reservation["space"] . "</td><td>" . $reservation["start_time"] . "</td><td>" . $reservation["end_time"] . "</td><td><a class='btn btn-sm btn-danger' href='index.php?delete_by_id=" . $reservation["id"] . "'>Törlés</a></td></tr>";
                     }
-                    if(count($reservations) <= 0){
-                        echo "<tr><td colspan='5' >Nincsen foglalás ezen a parkolóhelyen.</td></tr>";
+                    if (count($reservations) <= 0) {
+                        echo "<tr><td colspan='6' >Nincsen foglalás ezen a parkolóhelyen.</td></tr>";
                     }
                     ?>
                 </table>
