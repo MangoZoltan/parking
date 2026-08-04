@@ -16,6 +16,48 @@ function get_reservations()
     $result = CONN->query($sql);
     return $result->fetchAll();
 }
+
+// Foglalások lekérése parkolóhely alapján
+function get_reservations_by_space($space)
+{
+    $sql = "SELECT * FROM `reservations` WHERE `space` = ?";
+    $stmt = CONN->prepare($sql);
+    $stmt->bindParam(1, $space, PDO::PARAM_STR);
+    $stmt->execute();
+
+    return $stmt->fetchAll();
+}
+
+// Foglalások szűrése
+$filter_status = null;
+$reservations = array();
+
+if (!empty($_GET['filter_by_space'])) {
+
+    $space = $_GET['filter_by_space'];
+    $noerror = true;
+
+    // Csak létező parkolóhely listázása
+    $sql = "SELECT `name` FROM `spaces` WHERE `name` = ?";
+    $stmt = CONN->prepare($sql);
+    $stmt->bindParam(1, $space, PDO::PARAM_STR);
+    if (!$stmt->execute()) {
+        $filter_status = "Sikertelen: hiba a parkolóhely meglétének ellenőrzésekor.";
+        $noerror = false;
+    } else {
+        $occurrence = count($stmt->fetchAll());
+        if (!($occurrence > 0)) {
+            $filter_status = "A megadott parkolóhely nem létezik.";
+            $noerror = false;
+        }
+    }
+
+    if ($noerror)
+        $reservations = get_reservations_by_space($space);
+} else {
+    $reservations = get_reservations();
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="hu">
@@ -83,14 +125,15 @@ function get_reservations()
         <div class="row">
             <div class="col-12 py-3">
                 <h2>Foglalások</h2>
-                <a href="">Összes</a><br />
+                <a href="index.php">Összes</a><br />
                 <div>
-                    <p>Szűrés parkolóhelyre:</p>
-                    <form>
-                        <input type="text" name="filter_by_space" id="filter_by_space" placeholder="Pl.: A1">
+                    <p class="m-0">Szűrés parkolóhelyre:</p>
+                    <form method="GET" action="index.php">
+                        <input type="text" name="filter_by_space" id="filter_by_space" placeholder="Pl.: A1" value="<?= empty($_GET['filter_by_space']) ? "" : $_GET['filter_by_space'] ?>">
                         <button type="submit">Keresés</button>
                     </form>
                 </div>
+                <?php if ($filter_status != null) echo "<div class='my-2 py-2 px-3 bg-primary rounded text-white'>" . $filter_status . "</div>"; ?>
                 <table class="table">
                     <tr>
                         <th>#</th>
@@ -100,9 +143,12 @@ function get_reservations()
                         <th>Vége</th>
                     </tr>
                     <?php
-                    $reservations = get_reservations();
+                    
                     foreach ($reservations as $reservation) {
                         echo "<tr><td>" . $reservation["id"] . "</td><td>" . $reservation["reserver"] . "</td><td>" . $reservation["space"] . "</td><td>" . $reservation["start_time"] . "</td><td>" . $reservation["end_time"] . "</td></tr>";
+                    }
+                    if(count($reservations) <= 0){
+                        echo "<tr><td colspan='5' >Nincsen foglalás ezen a parkolóhelyen.</td></tr>";
                     }
                     ?>
                 </table>
