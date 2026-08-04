@@ -7,6 +7,7 @@ if ($_SERVER['REQUEST_METHOD'] != "POST") {
     header("Location: index.php");
     die();
 } else {
+    $noerror = true;
     $reserve_status = "-";
     $space = $_POST['res_space'] ?? null;
     $reserver = $_POST['res_reserver'] ?? null;
@@ -19,27 +20,46 @@ if ($_SERVER['REQUEST_METHOD'] != "POST") {
     $start_time_str = $start_date . ' ' . $start_time . ':00';
     $end_time_str = $end_date . ' ' . $end_time . ':00';
 
+    // Csak létező parkolóhely foglalható
+    $sql = "SELECT `name` FROM `spaces` WHERE `name` = ?";
+    $stmt = CONN->prepare($sql);
+    $stmt->bindParam(1, $space, PDO::PARAM_STR);
+    if (!$stmt->execute()) {
+        $reserve_status = "Sikertelen: hiba a parkolóhely meglétének ellenőrzésekor.";
+        $noerror = false;
+    } else {
+        $occurrence = count($stmt->fetchAll());
+        if (!($occurrence > 0)) {
+            $reserve_status = "Sikertelen: a megadott parkolóhely nem létezik.";
+            $noerror = false;
+        }
+    }
+
     // Átfedések ellenőrzése
-    $sql = "SELECT COUNT(*) as 'count' FROM `reservations` WHERE
+    if ($noerror) {
+        $sql = "SELECT COUNT(*) as 'count' FROM `reservations` WHERE
             (
                 (start_time < ? AND end_time > ?)
             ) AND space  = ?";
-    $stmt = CONN->prepare($sql);
-    $stmt->bindParam(1, $end_time_str, PDO::PARAM_STR);
-    $stmt->bindParam(2, $start_time_str, PDO::PARAM_STR);
-    $stmt->bindParam(3, $space, PDO::PARAM_STR);
+        $stmt = CONN->prepare($sql);
+        $stmt->bindParam(1, $end_time_str, PDO::PARAM_STR);
+        $stmt->bindParam(2, $start_time_str, PDO::PARAM_STR);
+        $stmt->bindParam(3, $space, PDO::PARAM_STR);
 
-    if (!$stmt->execute()) {
-        $reserve_status = "Sikertelen: hiba átfedés keresés közben.";
-    } else {
-        $count = $stmt->fetch()['count'];
-        if ($count > 0) {
-            $reserve_status = "Sikertelen: egybeesik egy másik foglalással.";
+        if (!$stmt->execute()) {
+            $reserve_status = "Sikertelen: hiba átfedés keresés közben.";
+            $noerror = false;
+        } else {
+            $collision_count = $stmt->fetch()['count'];
+            if ($collision_count > 0) {
+                $reserve_status = "Sikertelen: egybeesik egy másik foglalással.";
+                $noerror = false;
+            }
         }
     }
 
     // Rögzítés az adatbáziban
-    if (!($count > 0)) {
+    if ($noerror) {
         $sql = "INSERT INTO `reservations` (`space`, `reserver`, `start_time`, `end_time`) VALUES (?, ?, ?, ?);";
         $stmt = CONN->prepare($sql);
         $stmt->bindParam(1, $space, PDO::PARAM_STR);
@@ -49,6 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] != "POST") {
 
         if (!$stmt->execute()) {
             $reserve_status = "Sikertelen: hiba rögzítés közben.";
+            $noerror = false;
         } else {
             $reserve_status = "Sikeres foglalás!";
         }
