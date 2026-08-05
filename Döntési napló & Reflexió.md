@@ -16,4 +16,4 @@ Eredetileg mindent meg akartam valósítani, ami egy "teljes" projekthez elenged
 A Bootstrap használatát így sem tudtam elengedni.
 
 A feladat lényegi részéhez nem használtam AI-t, a programot magam írtam, némi Google keresés segítségével.
-A ChatGPT-t a dokumentáció körvonalainak megadásához használtam.
+A ChatGPT-t a dokumentáció körvonalainak megadásához és a Docker megfelelő beállításához használtam.

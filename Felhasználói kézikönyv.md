@@ -1,5 +1,10 @@
 # Felhasználói kézikönyv
 
+## Webalkalmazás indítása
+1. Töltse le vagy klónozza a repositoryt.
+2. A gyökérmappában az alábi parancsot kell lefuttatni: `docker compose up --build`
+3. Az oldal elérhetővé válik itt: http://localhost
+
 ## Parkolóhelyek listázása
 Az összes parkolóhely megjelenik az index.php oldalon a Helyek blokkban.
 

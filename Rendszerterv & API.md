@@ -12,6 +12,8 @@ Szükség esetén törölhető egy-egy foglalás.
 
 **Adatbázis:** MySQL - 8.4
 
+**Konténerizáció:** Docker, Docker Compose
+
 ## Teljesítmény optimalizálás
 A feladat önmagában nem tartalmaz olyan részeket, amelyek túlzottan erőforrás-igényesek lennének.
 Ennek ellenére mindig lehet javítani az optimalizáltságon.
