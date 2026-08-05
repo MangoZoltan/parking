@@ -35,6 +35,14 @@ if ($_SERVER['REQUEST_METHOD'] != "POST") {
         }
     }
 
+    // Legalább 3 karakter hosszú név, mint foglaló
+    if ($noerror) {
+        if(strlen($reserver) < 3){
+            $reserve_status = "Sikertelen: foglaló neve legalább 3 karakter.";
+            $noerror = false;
+        }
+    }
+
     // Kezdet és vég validálás
     if ($noerror) {
         $start = new DateTime($start_time_str);
